@@ -1,5 +1,7 @@
 { pkgs, lib, config, ... }:
 
+with lib;
+
 let
   installer = pkgs.nixos [
     ./installer.nix
@@ -16,7 +18,7 @@ in {
   config = {
     system.build.netinstaller = installer;
 
-    system.build.netinstaller-pixicore = system: let
+    system.build.netinstaller-pixiecore = system: let
       hostPkgs = if pkgs.system == system
         then pkgs
         else (import pkgs.path).legacyPackages.${system};
@@ -30,5 +32,11 @@ in {
         --dhcp-no-bind \
         "$@"
     '';
+
+    assertions = [
+      { assertion = hasAttr "diskoScript" config.system.build;
+        message = "Using netinstaller.nix requires disko";
+      }
+    ];
   };
 }
